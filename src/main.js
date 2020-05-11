@@ -2,8 +2,8 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-19 21:54:17
- * @LastEditTime : 2020-01-06 11:05:41
- * @LastEditors  : Please set LastEditors
+ * @LastEditTime: 2020-05-11 11:16:55
+ * @LastEditors: Please set LastEditors
  */
 import Vue from 'vue'
 
@@ -36,7 +36,6 @@ import '@/assets/font/iconfont.css'
  */
 import { mockXHR } from '../mock'
 import Print from 'vue-print-nb'
-import vueJsonp from 'vue-jsonp'
 if (process.env.NODE_ENV === 'production') {
   mockXHR()
 }
@@ -58,7 +57,6 @@ Vue.use(Print)
 //   // 服务器端地址
 //   connection: 'http://localhost:5000'
 // }))
-Vue.use(vueJsonp)
 
 Vue.prototype.Viewer = Viewer
 Viewer.setDefaults(viewerOption)

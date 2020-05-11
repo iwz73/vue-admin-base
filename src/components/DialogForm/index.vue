@@ -1,8 +1,8 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-01 10:18:26
- * @LastEditTime : 2020-01-06 15:23:11
- * @LastEditors  : Please set LastEditors
+ * @LastEditTime: 2020-03-13 14:22:52
+ * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \bpsp-ui\src\views\pages\Info\Staffs\index.vue
  -->
@@ -73,14 +73,6 @@
           img.avatar(v-if='ruleForm[item.prop]' :src='ruleForm[item.prop] | filterImg')
           i.el-icon-plus.avatar-uploader-icon(v-else)
       el-input(
-        v-else-if="item.type === 'number'"
-        v-model='ruleForm[item.prop]'
-        size="small"
-        oninput="value=value.replace(/[^\\d.]/g,'')"
-        autocomplete = "new-password"
-        :placeholder="item.horder || ('请输入' + item.label)"
-        :disabled="dialogType==='view' || (dialogType === 'update' && item.disUpdate)")
-      el-input(
         v-else
         v-model='ruleForm[item.prop]'
         size="small"
@@ -102,7 +94,15 @@ export default {
   },
   filters: {
     filterImg: (val) => {
-      return process.env.VUE_APP_BASE_API + val
+      if (val) {
+        if (val.includes('http')) {
+          return val
+        } else {
+          return process.env.VUE_APP_BASE_API + val
+        }
+      } else {
+        return val
+      }
     }
   },
   props: {
@@ -142,7 +142,7 @@ export default {
   },
   computed: {
     action() {
-      return `${process.env.VUE_APP_BASE_API}/backend/UploadImage`
+      return `${process.env.VUE_APP_BASE_API}/Basic/UploadImage`
     },
     ...mapGetters(['sysInfo', 'userInfo'])
   },
@@ -183,7 +183,7 @@ export default {
      * @return:
      */
     selectChange(value, type) {
-
+      this.$emit('onSelectChange', value, type)
     },
 
     /**

@@ -63,7 +63,15 @@ export default {
   },
   filters: {
     filterImg: (val) => {
-      return process.env.VUE_APP_BASE_API + val
+      if (val) {
+        if (val.includes('http')) {
+          return val
+        } else {
+          return process.env.VUE_APP_BASE_API + val
+        }
+      } else {
+        return val
+      }
     },
     dicsFilter: (val, prop, dics) => {
       const list = dics[prop].find(n => n.value === val)

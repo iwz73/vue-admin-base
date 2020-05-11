@@ -65,7 +65,15 @@ export default {
   },
   filters: {
     filterImg: (val) => {
-      return process.env.VUE_APP_BASE_API + val
+      if (val) {
+        if (val.includes('http')) {
+          return val
+        } else {
+          return process.env.VUE_APP_BASE_API + val
+        }
+      } else {
+        return val
+      }
     }
   },
   props: {
@@ -98,32 +106,35 @@ export default {
   watch: {
     row(newData, oldData) {
       const ruleForm = Object.assign({}, newData)
-      if (this.userInfo.DepartmentCodes.length > 0) {
-        ruleForm.DepartmentCode = this.userInfo.DepartmentCodes[0]
-        ruleForm.DepartmentName = this.userInfo.Departments[this.userInfo.DepartmentCodes[0]].Name
-      } else {
-        ruleForm.DepartmentCode = this.userInfo.DepartmentCode || ''
-        ruleForm.DepartmentName = this.userInfo.DepartmentName || ''
+      console.log(ruleForm)
+      if (ruleForm) {
+        if (this.userInfo.DepartmentCodes.length > 0) {
+          ruleForm.DepartmentCode = this.userInfo.DepartmentCodes[0]
+          ruleForm.DepartmentName = this.userInfo.Departments[this.userInfo.DepartmentCodes[0]].Name
+        } else {
+          ruleForm.DepartmentCode = this.userInfo.DepartmentCode || ''
+          ruleForm.DepartmentName = this.userInfo.DepartmentName || ''
+        }
+        ruleForm.senduser = this.userInfo.Name
+        // ruleForm.comid = ruleForm.id
+        // ruleForm.comname = ruleForm.QF001Zh
+        ruleForm.comid = ruleForm.Code
+        ruleForm.comname = ruleForm.Name
+        ruleForm.smstype = 0
+        // 调用接口 获取公司的负责人
+        const params = {
+          comcode: ruleForm.Code
+        }
+        getSysCompanyByCode(params).then(res => {
+          const row = res.Data
+          ruleForm.d3 = row.lxrName
+          ruleForm.phone = row.QF005
+          ruleForm.ywid = ruleForm.plt001Id
+          this.smsForm = ruleForm
+        }).catch(err => {
+          console.error(err)
+        })
       }
-      ruleForm.senduser = this.userInfo.Name
-      // ruleForm.comid = ruleForm.id
-      // ruleForm.comname = ruleForm.QF001Zh
-      ruleForm.comid = ruleForm.Code
-      ruleForm.comname = ruleForm.Name
-      ruleForm.smstype = 0
-      // 调用接口 获取公司的负责人
-      const params = {
-        comcode: ruleForm.Code
-      }
-      getSysCompanyByCode(params).then(res => {
-        const row = res.Data
-        ruleForm.d3 = row.lxrName
-        ruleForm.phone = row.QF005
-        ruleForm.ywid = ruleForm.plt001Id
-        this.smsForm = ruleForm
-      }).catch(err => {
-        console.error(err)
-      })
     }
   },
   created() {

@@ -2,26 +2,36 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-17 23:54:33
- * @LastEditTime : 2020-01-10 15:41:40
- * @LastEditors  : Please set LastEditors
+ * @LastEditTime: 2020-04-08 16:18:31
+ * @LastEditors: Please set LastEditors
  -->
 <template lang="pug">
 .edit-dialog.layout-column
-  .operation
-    el-button(
-      v-if="userInfo.UserType === 'Company' || operationAble"
-      @click="operation"
-      type="primary"
-      size="small") {{operationTitle}}
-    slot(name="add")
-  .table-warp.layout-column.flex1
+  .layout-row__between
+    .query()
+      el-input.input-search(
+        v-if="hasSearch"
+        :placeholder='searchHolder || "请输入"'
+        style='width:250px'
+        v-model='search' size="small" clearable @clear="doSearch")
+        el-button(slot="append" icon="el-icon-search" type="primary" size="small" @click="doSearch")
+
+    .operation
+      el-button(
+        v-if="userInfo.UserType === 'Company' || operationAble"
+        @click="operation"
+        type="primary"
+        size="small") {{operationTitle}}
+      slot(name="add")
+  .dialogtable-warp.layout-column.flex1
     el-table.flex1(
       v-loading="loading"
       :data='tableData'
       style='width: 100%'
       :header-cell-style='headerStyle'
-      :height="tableHeight"
+      height="50"
       border
+      ref="dialogTable"
       empty-text="没有数据")
       el-table-column(label="#" align="center" type="index")
       el-table-column(
@@ -43,19 +53,29 @@
             el-button(
               v-if="!editDisable"
               type="primary" plain @click="editRow(scope.row)" size="small") 编辑
-            el-button(type="danger" plain @click="deleted(scope.row)" size="small") 删除
+            el-button(v-if="!deletedDisable" type="danger" plain @click="deleted(scope.row)" size="small") 删除
+    .pages(v-if="hasPages")
+      el-pagination(
+        @current-change="handleCurrentChange"
+        @size-change="handleSizeChange"
+        :current-page="currentPage"
+        :page-size="pageSize"
+        :page-sizes="[20, 50, 100, 200]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total")
   //- 弹窗
   el-dialog.add-dialog(
     :title='title',
     :visible.sync='visible'
     :width='dialogWidth'
+    top="10vh"
     :before-close="handleDialogClose"
     :close-on-click-modal="false"
     :append-to-body="true")
     el-form(
       :model='ruleForm'
       ref='ruleForm'
-      label-width='120px')
+      :label-width='labelWidth')
       div(
         v-for="(item,index) in formColumns"
         :key="index")
@@ -117,8 +137,18 @@
           el-date-picker(
             v-else-if="item.type === 'date'"
             v-model="ruleForm[item.prop]"
+            value-format="yyyy-MM-dd"
             type="date"
             :class="[item.line?'line':'']"
+            placeholder="选择日期"
+            size="small"
+            :disabled="dialogType==='view'")
+          el-date-picker(
+            v-else-if="item.type === 'datetime'"
+            v-model="ruleForm[item.prop]"
+            type="datetime"
+            :class="[item.line?'line':'']"
+            value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="选择日期"
             size="small"
             :disabled="dialogType==='view'")
@@ -170,9 +200,9 @@ export default {
         return []
       }
     },
-    tableHeight: {
+    50: {
       type: String,
-      default: '300px'
+      default: '50px'
     },
     columns: {
       type: Array,
@@ -194,6 +224,22 @@ export default {
       type: String,
       default: '450px'
     },
+    labelWidth: {
+      type: String,
+      default: '120px'
+    },
+    pageSize: {
+      type: Number,
+      default: 20
+    },
+    currentPage: {
+      type: Number,
+      default: 1
+    },
+    total: {
+      type: Number,
+      default: 1
+    },
     hasPass: {
       type: Boolean,
       default: false
@@ -201,6 +247,22 @@ export default {
     editDisable: {
       type: Boolean,
       default: false
+    },
+    deletedDisable: {
+      type: Boolean,
+      default: false
+    },
+    hasPages: {
+      type: Boolean,
+      default: false
+    },
+    hasSearch: {
+      type: Boolean,
+      default: false
+    },
+    searchHolder: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -209,7 +271,8 @@ export default {
       visible: false,
       ruleForm: {},
       dialogType: 'add',
-      passwordType: 'password'
+      passwordType: 'password',
+      search: ''
     }
   },
   computed: {
@@ -222,7 +285,9 @@ export default {
     }
   },
   watch: {
-
+    tableData(n, o) {
+      this.$refs.dialogTable.doLayout()
+    }
   },
   created() {
   },
@@ -298,6 +363,12 @@ export default {
       this.resetForm('ruleForm')
       this.visible = false
     },
+    handleCurrentChange(e) {
+      this.$emit('onHandleCurrentChange', e)
+    },
+    handleSizeChange(e) {
+      this.$emit('onHandleSizeChange', e)
+    },
     showPwd() {
       if (this.passwordType === 'password') {
         this.passwordType = ''
@@ -315,6 +386,9 @@ export default {
     createdPwd() {
       const password = randomPassword(6)
       this.$set(this.ruleForm, 'Password', password)
+    },
+    doSearch() {
+      this.$emit('onDoSearch', this.search)
     }
   }
 }
@@ -333,6 +407,13 @@ export default {
   text-align: right
 }
 .add-dialog{
+  /deep/ .el-dialog{
+    .el-dialog__body{
+      padding: 10px 20px 30px 20px;
+      height: calc(100vh - 200px);
+      overflow-y: auto;
+    }
+  }
   /deep/ .el-input{
     width: 200px;
   }
@@ -348,5 +429,11 @@ export default {
 }
 .line{
   width: 100% !important
+}
+.pages{
+  margin-top: 20px;
+}
+.dialogtable-warp{
+  height: calc(100% - 48px);
 }
 </style>
