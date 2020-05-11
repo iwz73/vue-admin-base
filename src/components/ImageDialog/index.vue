@@ -21,7 +21,15 @@ export default {
   },
   filters: {
     filterImg: (val) => {
-      return process.env.VUE_APP_BASE_API + val
+      if (val) {
+        if (val.includes('http')) {
+          return val
+        } else {
+          return process.env.VUE_APP_BASE_API + val
+        }
+      } else {
+        return val
+      }
     }
   },
   props: {
@@ -37,6 +45,10 @@ export default {
       type: String,
       default: '50%'
     },
+    // imgWidth: {
+    //   type: String,
+    //   default: '100%'
+    // },
     top: {
       type: String,
       default: '10vh'

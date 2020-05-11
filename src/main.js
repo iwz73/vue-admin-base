@@ -45,8 +45,8 @@ if (process.env.NODE_ENV === 'production') {
   mockXHR()
 }
 
-import vueXlsxTable from 'vue-xlsx-table'
-Vue.use(vueXlsxTable, { rABS: false })
+// import vueXlsxTable from 'vue-xlsx-table'
+// Vue.use(vueXlsxTable, { rABS: false })
 // Vue.use(Autoc)
 
 // set ElementUI lang to EN
@@ -77,19 +77,19 @@ Viewer.setDefaults(viewerOption)
 
 Vue.config.productionTip = false
 
-new Vue({
-  el: '#app',
-  router,
-  store,
-  render: h => h(App)
-})
-
-// 预渲染
 // new Vue({
+//   el: '#app',
 //   router,
 //   store,
-//   mounted() {
-//     document.dispatchEvent(new Event('render-event'))
-//   },
 //   render: h => h(App)
-// }).$mount('#app')
+// })
+
+// 预渲染
+new Vue({
+  router,
+  store,
+  mounted() {
+    document.dispatchEvent(new Event('render-event'))
+  },
+  render: h => h(App)
+}).$mount('#app')

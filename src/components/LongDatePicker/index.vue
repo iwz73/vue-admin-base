@@ -16,7 +16,7 @@
       :value-format="valueFormat"
       :size="size"
       :editable="editable"
-      :picker-options="pickerOptions"
+      :picker-options="picker"
       format="长期"
       @change="onChange")
     el-date-picker(
@@ -28,7 +28,7 @@
       :placeholder="placeholder"
       :value-format="valueFormat"
       :size="size"
-      :picker-options="pickerOptions"
+      :picker-options="picker"
       @change="onChange")
 
 </template>
@@ -71,9 +71,50 @@ export default {
       default() {
         return {
           // disabledDate(time) {
-        //   return time.getTime() > Date.now()
-        // },
-          shortcuts: [
+          //   return time.getTime() + 60 * 60 * 24 * 1000 < Date.now()
+          // },
+          // shortcuts: [
+          // // {
+          // //   text: '今天',
+          // //   onClick(picker) {
+          // //     picker.$emit('pick', new Date())
+          // //   }
+          // // },
+          // // {
+          // //   text: '昨天',
+          // //   onClick(picker) {
+          // //     const date = new Date()
+          // //     date.setTime(date.getTime() - 3600 * 1000 * 24)
+          // //     picker.$emit('pick', date)
+          // //   }
+          // // },
+          // // {
+          // //   text: '长期',
+          // //   onClick(picker) {
+          // //     const date = new Date('2299-12-31')
+          // //     // date.setTime(date.getTime())
+          // //     picker.$emit('pick', date)
+          // //   }
+          // // }
+          // ]
+        }
+      }
+    }
+  },
+  data() {
+    return {
+      values: '',
+      input: '长期'
+    }
+  },
+  computed: {
+    ...mapGetters(['userInfo']),
+    // values() {
+    //   return this.valueTime
+    // }
+    picker: function() {
+      const def = {
+        shortcuts: [
           // {
           //   text: '今天',
           //   onClick(picker) {
@@ -88,30 +129,19 @@ export default {
           //     picker.$emit('pick', date)
           //   }
           // },
-            {
-              text: '长期',
-              onClick(picker) {
-                const date = new Date('2299-12-31')
-                // date.setTime(date.getTime())
-                picker.$emit('pick', date)
-              }
+          {
+            text: '长期',
+            onClick(picker) {
+              const date = new Date('2299-12-31')
+              // date.setTime(date.getTime())
+              picker.$emit('pick', date)
             }
-          ]
-        }
+          }
+        ]
       }
+      const obj = Object.assign(def, this.pickerOptions)
+      return obj
     }
-  },
-  data() {
-    return {
-      values: '',
-      input: '长期'
-    }
-  },
-  computed: {
-    ...mapGetters(['userInfo'])
-    // values() {
-    //   return this.valueTime
-    // }
   },
   watch: {
     valueTime: {
@@ -126,6 +156,7 @@ export default {
   },
   methods: {
     onChange(val) {
+      console.log(this.picker)
       this.$emit('onChange', val)
     }
   }
