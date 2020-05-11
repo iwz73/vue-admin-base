@@ -1,0 +1,110 @@
+<template>
+  <el-breadcrumb class="app-breadcrumb" separator="/">
+    <transition-group name="breadcrumb">
+      <el-breadcrumb-item v-for="(item,index) in levelList" :key="item.path">
+        <span
+          v-if="item.redirect==='noRedirect'||index==levelList.length-1"
+          class="no-redirect"
+        >
+          <span v-if="item.name === 'tag'">
+            {{ item.meta.title + ' _ ' + tags.find(n => parseInt(tagId) === n.id).tagName }}
+          </span>
+          <span v-else-if="item.name === 'search'">
+            {{ item.meta.title + search }}
+          </span>
+          <span v-else>
+            {{ item.meta.title }}
+          </span>
+        </span>
+        <a v-else @click.prevent="handleLink(item)">{{ item.meta.title }}</a>
+      </el-breadcrumb-item>
+    </transition-group>
+  </el-breadcrumb>
+</template>
+
+<script>
+import pathToRegexp from 'path-to-regexp'
+import { getUrlKey } from '@/utils'
+import { mapGetters } from 'vuex'
+
+export default {
+  data() {
+    return {
+      levelList: null
+    }
+  },
+  computed: {
+    ...mapGetters(['tags', 'tagId', 'search'])
+  },
+  watch: {
+    $route() {
+      this.getBreadcrumb()
+    },
+    tagId(news) {
+      this.getBreadcrumb()
+    }
+  },
+
+  created() {
+    // const id = getUrlKey('id', window.location.href)
+    // if (id) {
+    //   localStorage.setItem('worderId', id)
+    // } else {
+    //   id = localStorage.getItem('worderId')
+    // }
+    this.getBreadcrumb()
+  },
+  methods: {
+    getBreadcrumb() {
+      // only show routes with meta.title
+      const matched = this.$route.matched.filter(item => item.meta && item.meta.title)
+      // const first = matched[0]
+
+      // FIXME:删除始终显示Dashboard
+      // const first = matched[0]
+
+      // if (!this.isDashboard(first)) {
+      //   matched = [{ path: '/dashboard', meta: { title: 'Dashboard' }}].concat(matched)
+      // }
+      // FIXME:删除始终显示Dashboard
+
+      this.levelList = matched.filter(item => item.meta && item.meta.title && item.meta.breadcrumb !== false)
+    },
+    isDashboard(route) {
+      const name = route && route.name
+      if (!name) {
+        return false
+      }
+      return name.trim().toLocaleLowerCase() === 'Dashboard'.toLocaleLowerCase()
+    },
+    pathCompile(path) {
+      // To solve this problem https://github.com/PanJiaChen/vue-element-admin/issues/561
+      const { params } = this.$route
+      var toPath = pathToRegexp.compile(path)
+      return toPath(params)
+    },
+    handleLink(item) {
+      const { redirect, path } = item
+      if (redirect) {
+        this.$router.push(redirect)
+        return
+      }
+      this.$router.push(this.pathCompile(path))
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.app-breadcrumb.el-breadcrumb {
+  display: inline-block;
+  font-size: 14px;
+  line-height: 50px;
+  margin-left: 8px;
+
+  .no-redirect {
+    color: #97a8be;
+    cursor: text;
+  }
+}
+</style>
