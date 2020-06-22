@@ -500,3 +500,25 @@ export function ptwop(p, type = 'po') {
 export function getUrlKey(name, url) {
   return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(url) || [, ''])[1].replace(/\+/g, '%20')) || null
 }
+
+/**
+ * @description 获取两个人自己的随机数
+ * @param {Number} maxNum 最大数
+ * @param {Number} minNum 最小数
+ * @param {Number} decimalNum 如果生成的是带有小数的随机数，则指定随机数的小数点后的位数
+ */
+export function randomNum(maxNum, minNum, decimalNum) {
+  var max = 0
+  var min = 0
+  minNum <= maxNum ? (min = minNum, max = maxNum) : (min = maxNum, max = minNum)
+  switch (arguments.length) {
+    case 1:
+      return Math.floor(Math.random() * (max + 1))
+    case 2:
+      return Math.floor(Math.random() * (max - min + 1) + min)
+    case 3:
+      return (Math.random() * (max - min) + min).toFixed(decimalNum)
+    default:
+      return Math.random()
+  }
+}
